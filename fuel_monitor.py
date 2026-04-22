@@ -143,8 +143,11 @@ def save_to_history(brent_price, fuel_prices):
 # ---------------------------------------------------------------------------
 def generate_chart():
     """Read history CSV and render a dual-axis line chart."""
-    df = pd.read_csv(HISTORY_FILE)
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    # on_bad_lines="skip" ignores any corrupted rows (e.g. files edited in Excel)
+    # so one bad row never blocks the whole chart from rendering.
+    df = pd.read_csv(HISTORY_FILE, on_bad_lines="skip")
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    df = df.dropna(subset=["timestamp"])
     df = df.sort_values("timestamp")
 
     fig, ax1 = plt.subplots(figsize=(11, 6))
